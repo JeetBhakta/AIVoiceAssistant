@@ -1,14 +1,15 @@
 import speech_recognition as sr
 import webbrowser
 import os
-import re
+import time
 
-MICROPHONE = 2
+MICROPHONE = 1
 END_KEYWORD = "stop conversation"
 SEARCH_KEYWORD = "search"
 WEATHER_KEYWORD = "weather"
 NEWS_KEYWORD = "news"
-TIMER_KEYWORD = "timer"
+TIMER_KEYWORD = "start time"
+STOP_TIMER_KEYWORD = "stop"
 NOTES_KEYWORD = "right"
 
 
@@ -19,6 +20,7 @@ def voice_assistant():
     2. Check the weather
     3. Check news
     4. Take notes
+    5. Start timer
     """
     # obtain audio from the microphone
     r = sr.Recognizer()
@@ -51,15 +53,22 @@ def voice_assistant():
         elif NEWS_KEYWORD in text.lower():
             webbrowser.open_new(url="nbcnews.com")
         elif TIMER_KEYWORD in text.lower():
-            pass
-            # minutes = 1
-            # seconds = 0
-            # matches = re.findall(r'(\d+)\s*(minute|second)s?', text.lower())
-            # if "minutes" in text.lower():
-            #     minutes = sum(int(value) for value, unit in matches if unit == "minutes")
-            # if "seconds" in text.lower():
-            #     seconds = sum(int(value) for value, unit in matches if unit == "seconds")
-            # webbrowser.open_new(url=f"https://www.timerminutes.com/{minutes}-minutes-{seconds}-seconds-timer/")
+            stop = ""
+            start = time.perf_counter()
+            while True:
+                with sr.Microphone(device_index=MICROPHONE) as source:
+                    audio2 = r.listen(source, timeout=10)
+                try:
+                    stop = r.recognize_sphinx(audio2)
+                except sr.UnknownValueError:
+                    print("Sphinx could not understand audio")
+                except sr.RequestError as e:
+                    print("Sphinx error; {0}".format(e))
+                if STOP_TIMER_KEYWORD in stop.lower():
+                    break
+            end = time.perf_counter()
+            print("Stopwatch time:", str(round((end - start), 2)), "seconds")
+
         elif NOTES_KEYWORD in text.lower():
             note_file = "note.txt"
             with open(note_file, "a") as file:
