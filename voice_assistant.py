@@ -3,6 +3,7 @@ import webbrowser
 import os
 import re
 
+MICROPHONE = 2
 END_KEYWORD = "stop conversation"
 SEARCH_KEYWORD = "search"
 WEATHER_KEYWORD = "weather"
@@ -10,18 +11,22 @@ NEWS_KEYWORD = "news"
 TIMER_KEYWORD = "timer"
 NOTES_KEYWORD = "right"
 
-for index, name in enumerate(sr.Microphone.list_microphone_names()):
-    print("Microphone with name \"{1}\" found for `Microphone(device_index={0})`".format(index, name))
 
-
-def main():
+def voice_assistant():
+    """
+    Voice AI assistant using speech recognition that can do a few simple tasks.
+    1. Search phrase on Google
+    2. Check the weather
+    3. Check news
+    4. Take notes
+    """
     # obtain audio from the microphone
     r = sr.Recognizer()
 
     while True:
         # Dylan index: 1
         # Jeet index: 2
-        with sr.Microphone(device_index=2) as source:
+        with sr.Microphone(device_index=MICROPHONE) as source:
             print("Say something!")
             audio = r.listen(source, timeout=10)
 
@@ -55,19 +60,12 @@ def main():
             # if "seconds" in text.lower():
             #     seconds = sum(int(value) for value, unit in matches if unit == "seconds")
             # webbrowser.open_new(url=f"https://www.timerminutes.com/{minutes}-minutes-{seconds}-seconds-timer/")
-
         elif NOTES_KEYWORD in text.lower():
             note_file = "note.txt"
             with open(note_file, "a") as file:
                 os.startfile(note_file)
                 file.write(text[(text.index("right") + len(NOTES_KEYWORD) + 1):] + "\n")
 
-# LIST:
-# 1. Google things
-# 2. weather
-# 3. set a timer
-# 4. add notes
-# 5. news
 
 if __name__ == "__main__":
-    main()
+    voice_assistant()
